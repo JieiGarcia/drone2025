@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO-LOGISTICS 2030: 空の民主化レポート</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts (Orbitron for headers, Noto Sans JP for body) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Config & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        cyber: ['"Orbitron"', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            black: '#050505',
+                            dark: '#0a0a0f',
+                            panel: 'rgba(20, 20, 30, 0.8)',
+                            cyan: '#00f3ff',   // Primary Neon
+                            pink: '#ff00ff',   // Secondary Neon
+                            yellow: '#fcee0a', // Warning/Highlight
+                            dim: '#4b5563',
+                        }
+                    },
+                    backgroundImage: {
+                        'cyber-grid': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(to right, rgba(31, 41, 55, 0.3) 1px, transparent 1px), 
+                linear-gradient(to bottom, rgba(31, 41, 55, 0.3) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        /* Neon Glow Utilities */
+        .text-glow-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.7); }
+        .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
+        .box-glow-cyan { box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.1); }
+        .border-glow { border: 1px solid rgba(0, 243, 255, 0.3); }
+        
+        /* Glass Panel */
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #00f3ff;
+            box-shadow: 0 0 10px #00f3ff;
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #374151;
+            border-radius: 2px;
+        }
+
+        /* CHART CONTAINER STYLING */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 400px; }
+        }
+
+        /* Glitch Animation for Titles */
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .glitch-hover:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            color: #00f3ff;
+        }
+    </style>
+
+    <!-- Chosen Palette: Cyberpunk (Void Black + Neon Cyan + Hot Pink) -->
+    <!-- Application Structure Plan: Same logical flow as previous, but styled as a futuristic "Data Terminal". 
+         Visual language shifted from "Airy/clean" to "Digital/Hacker".
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="font-sans antialiased selection:bg-cyber-pink selection:text-white">
+
+    <!-- NAVIGATION / HEADER -->
+    <header class="border-b border-cyber-cyan/30 sticky top-0 z-50 bg-cyber-black/90 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-8 bg-cyber-cyan animate-pulse"></div>
+                    <h1 class="text-xl font-cyber font-bold text-white tracking-widest text-glow-cyan">
+                        NEO-LOGISTICS <span class="text-cyber-pink text-sm">2030</span>
+                    </h1>
+                </div>
+                <nav class="hidden md:flex space-x-8 text-sm font-cyber tracking-widest">
+                    <button onclick="scrollToSection('market')" class="text-slate-400 hover:text-cyber-cyan transition uppercase">[ Market_Data ]</button>
+                    <button onclick="scrollToSection('logistics')" class="text-slate-400 hover:text-cyber-cyan transition uppercase">[ Sim_Core ]</button>
+                    <button onclick="scrollToSection('lifestyle')" class="text-slate-400 hover:text-cyber-cyan transition uppercase">[ Life_Ops ]</button>
+                    <button onclick="scrollToSection('future')" class="text-slate-400 hover:text-cyber-cyan transition uppercase">[ Status ]</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20">
+
+        <!-- INTRO HERO -->
+        <section class="text-center max-w-5xl mx-auto py-10 relative">
+            <div class="absolute top-0 left-0 w-full h-full bg-cyber-cyan/5 rounded-full blur-3xl -z-10"></div>
+            
+            <span class="inline-block py-1 px-3 border border-cyber-cyan text-cyber-cyan font-cyber text-xs tracking-[0.2em] mb-6 animate-pulse">SYSTEM_ONLINE</span>
+            
+            <h2 class="text-5xl md:text-7xl font-cyber font-bold text-white mb-6 leading-tight">
+                SKY <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-cyber-pink">DEMOCRATIZATION</span>
+            </h2>
+            
+            <p class="text-xl text-slate-300 leading-relaxed mb-10 max-w-3xl mx-auto font-light">
+                空の産業革命が<span class="text-cyber-cyan font-bold">「ラストワンマイル」</span>をハックする。<br>
+                ドローン実装による物流クライシスの回避と、都市機能のアップデート。
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mt-8">
+                <div class="glass-panel p-6 border-l-2 border-l-cyber-cyan hover:bg-cyber-cyan/10 transition">
+                    <p class="text-xs text-cyber-cyan font-cyber mb-2">PROTOCOL_01</p>
+                    <p class="font-bold text-white text-lg">Level 4 Flight</p>
+                    <p class="text-sm text-slate-400 mt-2">有人地帯での目視外飛行解禁。都市上空が新たな輸送レーンとなる。</p>
+                </div>
+                <div class="glass-panel p-6 border-l-2 border-l-cyber-pink hover:bg-cyber-pink/10 transition">
+                    <p class="text-xs text-cyber-pink font-cyber mb-2">PROTOCOL_02</p>
+                    <p class="font-bold text-white text-lg">Logistics 2024</p>
+                    <p class="text-sm text-slate-400 mt-2">人的リソース枯渇に対する「無人化」ソリューション。</p>
+                </div>
+                <div class="glass-panel p-6 border-l-2 border-l-cyber-yellow hover:bg-cyber-yellow/10 transition">
+                    <p class="text-xs text-cyber-yellow font-cyber mb-2">PROTOCOL_03</p>
+                    <p class="font-bold text-white text-lg">Instant Delivery</p>
+                    <p class="text-sm text-slate-400 mt-2">時間価値の再定義。15分配送が変える都市生活UX。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 1: MARKET DATA -->
+        <section id="market" class="scroll-mt-24 border-t border-slate-800 pt-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-8">
+                <div>
+                    <h3 class="text-3xl font-cyber font-bold text-white flex items-center gap-3">
+                        <span class="text-cyber-cyan">>></span> MARKET_GROWTH
+                    </h3>
+                    <p class="text-slate-400 mt-2 font-mono text-sm">Target: 2030 // Data Source: Global Projection</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex gap-2">
+                    <button onclick="updateMarketChart('global')" id="btn-global" class="px-6 py-2 border border-cyber-cyan bg-cyber-cyan/20 text-cyber-cyan font-cyber text-sm hover:bg-cyber-cyan hover:text-black transition uppercase tracking-wider">Global</button>
+                    <button onclick="updateMarketChart('japan')" id="btn-japan" class="px-6 py-2 border border-slate-700 text-slate-500 font-cyber text-sm hover:border-cyber-pink hover:text-cyber-pink transition uppercase tracking-wider">Domestic</button>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 box-glow-cyan rounded-sm">
+                <!-- CHART CONTAINER -->
+                <div class="chart-container">
+                    <canvas id="marketChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: LOGISTICS SIMULATION -->
+        <section id="logistics" class="scroll-mt-24 border-t border-slate-800 pt-10">
+            <div class="mb-8">
+                <h3 class="text-3xl font-cyber font-bold text-white flex items-center gap-3 mb-2">
+                    <span class="text-cyber-pink">>></span> LOGISTICS_SIMULATOR
+                </h3>
+                <p class="text-slate-400 max-w-3xl">
+                    <span class="text-cyber-pink">[ Truck ]</span> vs <span class="text-cyber-cyan">[ Drone ]</span> Performance Analysis. <br>
+                    スライダーを操作して損益分岐点（Break-even Point）を探索せよ。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Controls -->
+                <div class="lg:col-span-1 glass-panel p-8 border border-cyber-cyan/30 flex flex-col justify-center">
+                    <h4 class="text-lg font-cyber text-cyber-cyan mb-6 border-b border-cyber-cyan/30 pb-2">INPUT_PARAMETERS</h4>
+                    
+                    <label class="block text-sm font-mono text-slate-400 mb-2">DISTANCE (KM)</label>
+                    <div class="flex items-center gap-4 mb-8">
+                        <input type="range" min="1" max="20" value="5" id="distanceSlider" class="w-full">
+                        <span class="text-3xl font-cyber font-bold w-20 text-right text-white"><span id="distanceVal">5</span><span class="text-sm text-slate-500 ml-1">KM</span></span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-black/50 border border-slate-700 p-4">
+                            <p class="text-xs text-cyber-yellow font-mono uppercase">PAYLOAD TYPE</p>
+                            <p class="font-bold text-slate-200">Lightweight Cargo (&lt;5kg)</p>
+                        </div>
+                        <div class="bg-black/50 border border-slate-700 p-4">
+                            <p class="text-xs text-cyber-yellow font-mono uppercase">ANALYSIS RESULT</p>
+                            <p id="droneAdvantageText" class="font-bold text-cyber-cyan text-lg glitch-hover">CALCULATING...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="lg:col-span-2 glass-panel p-6 border border-slate-700">
+                    <h4 class="text-xs font-cyber text-slate-500 uppercase mb-4 text-center tracking-widest">Efficiency Metric Visualization</h4>
+                    
+                    <!-- CHART CONTAINER -->
+                    <div class="chart-container">
+                        <canvas id="logisticsChart"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-6 text-center border-t border-slate-800 pt-4">
+                        <div>
+                            <p class="text-xs font-mono text-slate-500">TRUCK DELIVERY TIME</p>
+                            <p class="text-3xl font-cyber font-bold text-slate-400" id="truckTimeDisplay">25 min</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-mono text-cyber-cyan">DRONE DELIVERY TIME</p>
+                            <p class="text-3xl font-cyber font-bold text-cyber-cyan text-glow-cyan" id="droneTimeDisplay">7 min</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: LIFESTYLE IMPACT -->
+        <section id="lifestyle" class="scroll-mt-24 border-t border-slate-800 pt-10">
+            <h3 class="text-3xl font-cyber font-bold text-white flex items-center gap-3 mb-8">
+                <span class="text-cyber-yellow">>></span> USE_CASE_SCENARIOS
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Interactive Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="showScenario('medical')" class="group glass-panel p-6 text-left hover:border-cyber-cyan transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-cyber-cyan/0 group-hover:bg-cyber-cyan/5 transition"></div>
+                        <div class="text-2xl mb-2 text-cyber-cyan">✚</div>
+                        <h4 class="font-cyber font-bold text-white group-hover:text-cyber-cyan">MEDICAL</h4>
+                        <p class="text-xs text-slate-500 font-mono mt-1">EMERGENCY TRANSPORT</p>
+                    </button>
+                    <button onclick="showScenario('disaster')" class="group glass-panel p-6 text-left hover:border-cyber-yellow transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-cyber-yellow/0 group-hover:bg-cyber-yellow/5 transition"></div>
+                        <div class="text-2xl mb-2 text-cyber-yellow">⚠</div>
+                        <h4 class="font-cyber font-bold text-white group-hover:text-cyber-yellow">DISASTER</h4>
+                        <p class="text-xs text-slate-500 font-mono mt-1">RESCUE & SUPPLY</p>
+                    </button>
+                    <button onclick="showScenario('shopping')" class="group glass-panel p-6 text-left hover:border-cyber-pink transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-cyber-pink/0 group-hover:bg-cyber-pink/5 transition"></div>
+                        <div class="text-2xl mb-2 text-cyber-pink">⚗</div>
+                        <h4 class="font-cyber font-bold text-white group-hover:text-cyber-pink">RURAL</h4>
+                        <p class="text-xs text-slate-500 font-mono mt-1">INFRA SUPPORT</p>
+                    </button>
+                    <button onclick="showScenario('urban')" class="group glass-panel p-6 text-left hover:border-white transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition"></div>
+                        <div class="text-2xl mb-2 text-white">◈</div>
+                        <h4 class="font-cyber font-bold text-white group-hover:text-slate-200">URBAN</h4>
+                        <p class="text-xs text-slate-500 font-mono mt-1">INSTANT LOGISTICS</p>
+                    </button>
+                </div>
+
+                <!-- Detail Panel -->
+                <div class="glass-panel p-8 border border-cyber-cyan flex flex-col justify-center relative">
+                    <div class="absolute top-0 right-0 p-2 opacity-50">
+                        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke="#00f3ff" stroke-width="1">
+                            <circle cx="50" cy="50" r="40" />
+                            <line x1="50" y1="10" x2="50" y2="90" />
+                            <line x1="10" y1="50" x2="90" y2="50" />
+                        </svg>
+                    </div>
+                    
+                    <div id="scenario-content">
+                        <span class="text-cyber-cyan font-cyber tracking-widest text-xs uppercase mb-4 block border-b border-cyber-cyan/20 pb-2">DATA_STREAM_RECEIVED</span>
+                        <h4 id="scenario-title" class="text-3xl font-bold text-white mb-4">AWAITING INPUT...</h4>
+                        <p id="scenario-desc" class="text-slate-300 leading-relaxed mb-8 font-light">
+                            左記グリッドよりデータ・ノードを選択し、詳細情報を展開してください。
+                        </p>
+                        <div class="bg-black/40 p-4 border-l-4 border-cyber-pink">
+                            <p class="text-xs text-cyber-pink font-mono uppercase">PROJECTED IMPACT</p>
+                            <p id="scenario-impact" class="text-xl font-bold text-white mt-1">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: FUTURE READINESS -->
+        <section id="future" class="scroll-mt-24 mb-12 border-t border-slate-800 pt-10">
+            <h3 class="text-3xl font-cyber font-bold text-white flex items-center gap-3 mb-8">
+                <span class="text-cyber-cyan">>></span> IMPLEMENTATION_STATUS
+            </h3>
+
+            <div class="glass-panel p-6 border-t-2 border-t-cyber-cyan">
+                <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-12">
+                    <!-- CHART CONTAINER -->
+                    <div class="chart-container order-2 md:order-1 relative">
+                        <!-- Decorative circle bg -->
+                        <div class="absolute inset-0 bg-cyber-cyan/5 rounded-full blur-2xl transform scale-75"></div>
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <div class="order-1 md:order-2 space-y-6">
+                        <h4 class="font-cyber text-xl text-white mb-4">CRITICAL_OBSTACLES</h4>
+                        <ul class="space-y-4 font-mono text-sm">
+                            <li class="flex items-start group">
+                                <span class="text-cyber-cyan mr-3 group-hover:text-white transition">>>></span>
+                                <div>
+                                    <span class="font-bold text-cyber-cyan block group-hover:text-glow-cyan transition">REGULATION [法規制]</span>
+                                    <span class="text-slate-500">航空法改正完了。Level 4認可プロセス稼働中。</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start group">
+                                <span class="text-cyber-pink mr-3 group-hover:text-white transition">>>></span>
+                                <div>
+                                    <span class="font-bold text-cyber-pink block group-hover:text-glow-pink transition">ACCEPTANCE [社会受容性]</span>
+                                    <span class="text-slate-500">騒音・落下リスクへの懸念。パブリック・リレーションズが必要。</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start group">
+                                <span class="text-cyber-yellow mr-3 group-hover:text-white transition">>>></span>
+                                <div>
+                                    <span class="font-bold text-cyber-yellow block">ECONOMY [経済合理性]</span>
+                                    <span class="text-slate-500">機体量産化によるコストダウンが未達。</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center text-slate-600 text-xs py-10 border-t border-slate-900 font-mono">
+            <p>SYSTEM STATUS: STABLE // CONNECTION: SECURE</p>
+            <p class="mt-2">© 2030 Sky Democratization Project. // TERMINAL_ID: 8492-X</p>
+        </footer>
+
+    </main>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- CHART GLOBAL DEFAULTS FOR DARK MODE ---
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#334155';
+        Chart.defaults.font.family = "'Orbitron', 'Noto Sans JP', sans-serif";
+
+        // --- DATA & STATE ---
+        const marketData = {
+            global: {
+                label: 'Global Market ($B)',
+                labels: ['2020', '2022', '2024', '2026', '2028', '2030'],
+                data: [225, 304, 450, 680, 1100, 1850],
+                color: '#00f3ff', // Cyan
+                bg: 'rgba(0, 243, 255, 0.1)'
+            },
+            japan: {
+                label: 'Domestic Market (¥100M)',
+                labels: ['2020', '2022', '2024', '2026', '2028', '2030'],
+                data: [1841, 3086, 4500, 6800, 9500, 14000],
+                color: '#ff00ff', // Pink
+                bg: 'rgba(255, 0, 255, 0.1)'
+            }
+        };
+
+        const scenarios = {
+            medical: {
+                title: 'MEDICAL TRANSPORT',
+                desc: '交通網から解放されたバイタルライン。血液・検体・緊急医薬品を最短ルートで輸送。生存率に直結するタイムロスの排除。',
+                impact: '>>> EMERGENCY SURVIVAL RATE +40%'
+            },
+            disaster: {
+                title: 'DISASTER RELIEF',
+                desc: '陸路途絶エリアへの空輸ブリッジ。AI解析による被害状況マッピングと、孤立集落へのバッテリー・通信機器の投下。',
+                impact: '>>> RESPONSE TIME -70%'
+            },
+            shopping: {
+                title: 'RURAL INFRASTRUCTURE',
+                desc: '限界集落のライフライン維持。定期自動航行による食料・日用品の補給線構築。地域コミュニティの「物理的孤立」を防ぐ。',
+                impact: '>>> SUSTAINABILITY SCORE: HIGH'
+            },
+            urban: {
+                title: 'URBAN INSTANT DELIVERY',
+                desc: '都市型マイクロ物流。屋上ポートを活用した3次元ネットワーク。フードデリバリーから緊急部品まで、15分圏内の即時性を実現。',
+                impact: '>>> TRAFFIC CONGESTION -15%'
+            }
+        };
+
+        // --- CHART INITIALIZATION ---
+        
+        // 1. Market Chart
+        const ctxMarket = document.getElementById('marketChart').getContext('2d');
+        let marketChart = new Chart(ctxMarket, {
+            type: 'line',
+            data: {
+                labels: marketData.global.labels,
+                datasets: [{
+                    label: marketData.global.label,
+                    data: marketData.global.data,
+                    borderColor: marketData.global.color,
+                    backgroundColor: marketData.global.bg,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#000',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { font: { family: 'Orbitron' } } },
+                    tooltip: { 
+                        backgroundColor: 'rgba(10, 10, 20, 0.9)',
+                        titleColor: '#00f3ff',
+                        borderColor: '#00f3ff',
+                        borderWidth: 1,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: { grid: { color: '#1e293b' } },
+                    y: { beginAtZero: true, grid: { color: '#1e293b' } }
+                }
+            }
+        });
+
+        // 2. Logistics Chart
+        const ctxLogistics = document.getElementById('logisticsChart').getContext('2d');
+        let logisticsChart = new Chart(ctxLogistics, {
+            type: 'bar',
+            data: {
+                labels: ['COST (JPY)', 'TIME (MIN)'],
+                datasets: [
+                    {
+                        label: 'TRUCK',
+                        data: [0, 0], 
+                        backgroundColor: '#475569', 
+                        borderColor: '#475569',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'DRONE',
+                        data: [0, 0], 
+                        backgroundColor: 'rgba(0, 243, 255, 0.8)', 
+                        borderColor: '#00f3ff',
+                        borderWidth: 1,
+                        boxShadow: '0 0 10px #00f3ff'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { family: 'Orbitron' } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 3. Radar Chart
+        const ctxRadar = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['LAW', 'TECH', 'BATTERY', 'ECONOMY', 'SOCIAL', 'SYSTEM'],
+                datasets: [{
+                    label: 'READINESS LEVEL',
+                    data: [85, 75, 60, 50, 40, 70],
+                    fill: true,
+                    backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                    borderColor: '#ff00ff',
+                    pointBackgroundColor: '#ff00ff',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#ff00ff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#334155' },
+                        grid: { color: '#334155' },
+                        pointLabels: { 
+                            font: { size: 10, family: 'Orbitron' },
+                            color: '#e2e8f0'
+                        },
+                        ticks: { backdropColor: 'transparent', color: '#94a3b8' },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+
+        // --- INTERACTION LOGIC ---
+
+        function updateMarketChart(region) {
+            const data = marketData[region];
+            marketChart.data.labels = data.labels;
+            marketChart.data.datasets[0].label = data.label;
+            marketChart.data.datasets[0].data = data.data;
+            marketChart.data.datasets[0].borderColor = data.color;
+            marketChart.data.datasets[0].backgroundColor = data.bg;
+            marketChart.update();
+
+            // Toggle Button Styles
+            const btnGlobal = document.getElementById('btn-global');
+            const btnJapan = document.getElementById('btn-japan');
+            
+            if (region === 'global') {
+                btnGlobal.className = "px-6 py-2 border border-cyber-cyan bg-cyber-cyan/20 text-cyber-cyan font-cyber text-sm hover:bg-cyber-cyan hover:text-black transition uppercase tracking-wider";
+                btnJapan.className = "px-6 py-2 border border-slate-700 text-slate-500 font-cyber text-sm hover:border-cyber-pink hover:text-cyber-pink transition uppercase tracking-wider";
+            } else {
+                btnGlobal.className = "px-6 py-2 border border-slate-700 text-slate-500 font-cyber text-sm hover:border-cyber-cyan hover:text-cyber-cyan transition uppercase tracking-wider";
+                btnJapan.className = "px-6 py-2 border border-cyber-pink bg-cyber-pink/20 text-cyber-pink font-cyber text-sm hover:bg-cyber-pink hover:text-black transition uppercase tracking-wider";
+            }
+        }
+
+        function updateLogisticsSim() {
+            const distance = parseInt(document.getElementById('distanceSlider').value);
+            document.getElementById('distanceVal').textContent = distance;
+
+            const truckBaseCost = 500;
+            const truckCostPerKm = 50;
+            const truckSpeedKmh = 20; 
+            
+            const droneBaseCost = 200;
+            const droneCostPerKm = 100; 
+            const droneSpeedKmh = 50;
+
+            const truckCost = truckBaseCost + (truckCostPerKm * distance);
+            const truckTime = Math.round((distance / truckSpeedKmh) * 60) + 10;
+
+            const droneCost = droneBaseCost + (droneCostPerKm * distance);
+            const droneTime = Math.round((distance / droneSpeedKmh) * 60) + 2;
+
+            document.getElementById('truckTimeDisplay').textContent = `${truckTime} min`;
+            document.getElementById('droneTimeDisplay').textContent = `${droneTime} min`;
+            
+            const advText = document.getElementById('droneAdvantageText');
+            if(distance < 3) {
+                advText.textContent = ">>> STATUS: HIGH EFFICIENCY";
+                advText.className = "font-bold text-cyber-cyan text-lg glitch-hover text-glow-cyan";
+            } else if (distance < 10) {
+                advText.textContent = ">>> STATUS: SPEED ADVANTAGE";
+                advText.className = "font-bold text-white text-lg";
+            } else {
+                advText.textContent = ">>> STATUS: COST INEFFICIENT";
+                advText.className = "font-bold text-cyber-yellow text-lg";
+            }
+
+            logisticsChart.data.datasets[0].data = [truckCost, truckTime];
+            logisticsChart.data.datasets[1].data = [droneCost, droneTime];
+            logisticsChart.update();
+        }
+
+        function showScenario(key) {
+            const data = scenarios[key];
+            const contentDiv = document.getElementById('scenario-content');
+            
+            contentDiv.style.opacity = '0';
+            contentDiv.style.transform = 'translateY(10px)';
+            contentDiv.style.transition = 'all 0.2s ease-out';
+            
+            setTimeout(() => {
+                document.getElementById('scenario-title').textContent = data.title;
+                document.getElementById('scenario-desc').textContent = data.desc;
+                document.getElementById('scenario-impact').textContent = data.impact;
+                contentDiv.style.opacity = '1';
+                contentDiv.style.transform = 'translateY(0)';
+            }, 200);
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('distanceSlider').addEventListener('input', updateLogisticsSim);
+            updateLogisticsSim();
+            showScenario('medical');
+        });
+    </script>
+</body>
+</html>
